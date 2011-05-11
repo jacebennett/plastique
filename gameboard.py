@@ -27,3 +27,22 @@ class GameBoard(object):
 
 
 
+def victory(board):
+	return False
+
+board = GameBoard()
+board.render()
+
+while(victory(board) != True):
+	command = raw_input("Which column (1-7, q=quit)? ")
+	if(command == "q"):
+		exit()
+	elif(command.isdigit()):
+		col = int(command)
+		if col < 1 or col > 7:
+			print "please choose a number between 1 and 7"
+		else:
+			board.add_piece(PLAYER_PIECE, col-1)
+			board.render()
+	else:
+		print "Unknown command"
