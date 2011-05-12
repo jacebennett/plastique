@@ -1,8 +1,8 @@
 MAX_COLUMN_SIZE=6
 NUM_COLUMNS=7
 
-PLAYER_PIECE = '0'
-COMPUTER_PIECE = '1'
+PLAYER = '0'
+COMPUTER = '1'
 
 class GameBoard(object):
 	def __init__(self):
@@ -26,23 +26,69 @@ class GameBoard(object):
 			print row_str
 
 
+class Game(object):
+	def __init__(self):
+		self.board = GameBoard()
+		self.current_player = PLAYER
 
-def victory(board):
-	return False
+	def play(self, player, move):
+		self.board.add_piece(player, move)
+		self.toggle_player()
 
-board = GameBoard()
-board.render()
+	def toggle_player(self):
+		self.current_player = COMPUTER if self.current_player == PLAYER else PLAYER
 
-while(victory(board) != True):
-	command = raw_input("Which column (1-7, q=quit)? ")
-	if(command == "q"):
-		exit()
-	elif(command.isdigit()):
-		col = int(command)
-		if col < 1 or col > 7:
-			print "please choose a number between 1 and 7"
+	def get_legal_moves(self):
+		result = []
+		for i in range(len(self.board.columns)):
+			if(len(self.board.columns[i]) < MAX_COLUMN_SIZE):
+				result.append(i)
+		return result
+	
+	def has_victor(self):
+		return False
+
+from random import Random
+
+class ComputerPlayer(object):
+	def __init__(self):
+		self.rng = Random()
+
+	def get_move(self, game):
+		move = self.rng.choice(game.get_legal_moves())
+		print
+		print "Computer plays in column " + str(move + 1)
+		print
+		return move
+
+
+class HumanPlayer(object):
+	def get_move(self, game):
+		game.board.render()
+		while(True):
+			command = raw_input("Which column (1-7, q=quit)? ")
+			if(command == "q"):
+				exit()
+			elif(command.isdigit()):
+				col = int(command) - 1
+				if game.get_legal_moves().count(col) > 0:
+					return col
+				else:
+					print str(col) + " is not a legal move"
+			else:
+				print "Unknown command"
+
+if __name__ == "__main__":
+	game = Game()
+	player = HumanPlayer()
+	opponent = ComputerPlayer()
+
+	while(game.has_victor != True):
+		if game.current_player == PLAYER:
+			move = player.get_move(game)
+			game.play(PLAYER, move)
 		else:
-			board.add_piece(PLAYER_PIECE, col-1)
-			board.render()
-	else:
-		print "Unknown command"
+			move = opponent.get_move(game)
+			game.play(COMPUTER, move)
+
+
