@@ -16,20 +16,26 @@ class GameBoard(object):
 
 	
 	def render(self):
-		for h in range(5, -1, -1):
-			row_str = ''
-			for w in range(NUM_COLUMNS):
-				if len(self.columns[w]) > h:
-					row_str += self.columns[w][h]
+		for row in range(5, -1, -1):
+			row_strings = []
+			for col in range(NUM_COLUMNS):
+				if len(self.columns[col]) > row:
+					row_strings.append(self.columns[col][row])
 				else:
-					row_str += "."
-			print row_str
+					row_strings.append(".")
+			print "".join(row_strings)
 
 
 class Game(object):
-	def __init__(self):
+	def __init__(self, players):
 		self.board = GameBoard()
+		self.players = players
 		self.current_player = PLAYER1
+
+	def run(self):
+		while(not self.is_over()):
+			move = self.players[self.current_player].get_move(self)
+			self.play(move)
 
 	def play(self, move):
 		self.board.add_piece(self.current_player, move)
@@ -85,21 +91,16 @@ class HumanPlayer(object):
 				print "Unknown command"
 
 if __name__ == "__main__":
-	game = Game()
 	players = { PLAYER1: HumanPlayer(), PLAYER2: ComputerPlayer() }
-
-	while(not game.is_over()):
-		move = players[game.current_player].get_move(game)
-		game.play(move)
+	game = Game(players)
+	
+	game.run()
 
 	game.board.render()
 	print
-
 	if game.is_draw():
 		print " === DRAW === "
-	
 	elif game.has_victor():
 		print " === " + game.current_player + " IS THE WINNER === "
-	
 	print
 
