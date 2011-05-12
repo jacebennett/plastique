@@ -1,8 +1,8 @@
 MAX_COLUMN_SIZE=6
 NUM_COLUMNS=7
 
-PLAYER = '0'
-COMPUTER = '1'
+PLAYER1 = '0'
+PLAYER2 = '1'
 
 class GameBoard(object):
 	def __init__(self):
@@ -29,14 +29,14 @@ class GameBoard(object):
 class Game(object):
 	def __init__(self):
 		self.board = GameBoard()
-		self.current_player = PLAYER
+		self.current_player = PLAYER1
 
-	def play(self, player, move):
-		self.board.add_piece(player, move)
+	def play(self, move):
+		self.board.add_piece(self.current_player, move)
 		self.toggle_player()
 
 	def toggle_player(self):
-		self.current_player = COMPUTER if self.current_player == PLAYER else PLAYER
+		self.current_player = PLAYER2 if self.current_player == PLAYER1 else PLAYER1
 
 	def get_legal_moves(self):
 		result = []
@@ -47,6 +47,12 @@ class Game(object):
 	
 	def has_victor(self):
 		return False
+
+	def is_draw(self):
+		return len(self.get_legal_moves()) == 0 and not self.has_victor()
+
+	def is_over(self):
+		return self.has_victor() or self.is_draw()
 
 from random import Random
 
@@ -74,21 +80,26 @@ class HumanPlayer(object):
 				if game.get_legal_moves().count(col) > 0:
 					return col
 				else:
-					print str(col) + " is not a legal move"
+					print command + " is not a legal move"
 			else:
 				print "Unknown command"
 
 if __name__ == "__main__":
 	game = Game()
-	player = HumanPlayer()
-	opponent = ComputerPlayer()
+	players = { PLAYER1: HumanPlayer(), PLAYER2: ComputerPlayer() }
 
-	while(game.has_victor != True):
-		if game.current_player == PLAYER:
-			move = player.get_move(game)
-			game.play(PLAYER, move)
-		else:
-			move = opponent.get_move(game)
-			game.play(COMPUTER, move)
+	while(not game.is_over()):
+		move = players[game.current_player].get_move(game)
+		game.play(move)
 
+	game.board.render()
+	print
+
+	if game.is_draw():
+		print " === DRAW === "
+	
+	elif game.has_victor():
+		print " === " + game.current_player + " IS THE WINNER === "
+	
+	print
 

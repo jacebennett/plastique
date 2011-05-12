@@ -4,7 +4,7 @@ import gameboard
 class GameBoardTests(unittest.TestCase):
 	def test_playing_the_first_piece(self):
 		g = gameboard.GameBoard()
-		g.add_piece(gameboard.PLAYER, 1)
+		g.add_piece(gameboard.PLAYER1, 1)
 		
 		column_sizes = map((lambda c: len(c)), g.columns)
 
