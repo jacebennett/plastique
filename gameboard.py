@@ -1,14 +1,12 @@
 NUM_ROWS=6
 NUM_COLUMNS=7
+GROUP_SIZE = 4
 
 PLAYER1 = 0
 PLAYER2 = 1
 
 class GameBoard(object):
-	def __init__(self):
-		self.columns = [];
-		for i in range(NUM_COLUMNS):
-			self.columns.append([])
+	columns = [[] for in in range(NUM_COLUMNS)]
 
 	def add_piece(self, pieceType, column_index):
 		if len(self.columns[column_index]) >= NUM_ROWS:
@@ -29,7 +27,7 @@ class GameBoard(object):
 		return self.columns[x][y]
 
 	def render(self):
-		for row in range(5, -1, -1):
+		for row in range(NUM_ROWS-1, -1, -1):
 			row_strings = []
 			for col in range(NUM_COLUMNS):
 				if len(self.columns[col]) > row:
@@ -39,12 +37,13 @@ class GameBoard(object):
 			print "".join(row_strings)
 
 class Game(object):
+	board = GameBoard()
+	current_player = PLAYER1
+	history = []
+	winner = None
+
 	def __init__(self, players):
-		self.board = GameBoard()
 		self.players = players
-		self.current_player = PLAYER1
-		self.history = []
-		self.winner = None
 
 	def play(self):
 		while not self.is_over():
@@ -57,7 +56,7 @@ class Game(object):
 	
 	def record_move(self, move):
 		self.board.add_piece(self.current_player, move)
-		self.history.append(move)
+		self.history.append( (move, len(self.board.columns[move])-1) )
 
 	def undo(self):
 		if len(self.history) < 2:
@@ -66,7 +65,7 @@ class Game(object):
 
 	def rollback(self, count):
 		for i in range(count):
-			col = self.history.pop()
+			col,row = self.history.pop()
 			self.board.remove_last_piece_in(col)
 			self.toggle_player()
 
@@ -83,9 +82,7 @@ class Game(object):
 		return [i for i in range(len(self.board.columns)) if not self.board.column_full(i)]
 
 	def last_move(self):
-		col = self.history[-1]
-		row = len(self.board.columns[col]) - 1
-		return (col,row)
+		return self.history[-1]
 
 	def is_won(self):
 		return self.winner != None
@@ -100,10 +97,6 @@ class Game(object):
 		return [group for group in self.all_possible_winning_groups() if group.count(element) > 0]
 
 	def all_possible_winning_groups(self):
-		NUM_COLUMNS = 7
-		NUM_ROWS = 6
-		GROUP_SIZE = 4
-
 		V_HEADROOM = NUM_ROWS - GROUP_SIZE
 		H_HEADROOM = NUM_COLUMNS - GROUP_SIZE
 
@@ -133,8 +126,7 @@ class Game(object):
 from random import Random
 
 class ComputerPlayer(object):
-	def __init__(self):
-		self.rng = Random()
+	rng = Random()
 
 	def get_move(self, game):
 		return self.rng.choice(game.get_legal_moves())
