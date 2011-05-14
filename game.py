@@ -1,22 +1,26 @@
 from gameboard import *
 
+GROUP_SIZE = 4
+
 PLAYER1 = 0
 PLAYER2 = 1
 
 class Game(object):
-	board = GameBoard()
-	current_player = PLAYER1
-	history = []
-	winner = None
-
 	def __init__(self, players):
+		self.board = GameBoard()
+		self.current_player_index = PLAYER1
+		self.history = []
+		self.winner = None
 		self.players = players
+	
+	def current_player(self):
+		return self.players[self.current_player_index]
 
-	def record_move(self, move):
-		self.board.add_piece(self.current_player, move)
-		self.history.append( (move, len(self.board.columns[move])-1) )
+	def record_move(self, column):
+		final_position = self.board.add_piece(self.current_player_index, column)
+		self.history.append(final_position)
 		if self.check_for_victory():
-			self.winner = self.current_player
+			self.winner = self.current_player()
 
 	def undo(self):
 		if len(self.history) < 2:
@@ -32,14 +36,14 @@ class Game(object):
 	def check_for_victory(self):
 		won = False
 		for group in self.possible_winning_groups_containing(self.last_move()):
-			won = won or [self.board.get_piece_at(x,y) for x,y in group].count(self.current_player) == len(group)
+			won = won or [self.board.get_piece_at(x,y) for x,y in group].count(self.current_player_index) == len(group)
 		return won
 
 	def toggle_player(self):
-		self.current_player = PLAYER2 if self.current_player == PLAYER1 else PLAYER1
+		self.current_player_index = PLAYER2 if self.current_player_index == PLAYER1 else PLAYER1
 
 	def get_legal_moves(self):
-		return [i for i in range(len(self.board.columns)) if not self.board.column_full(i)]
+		return [i for i in range(self.board.NUM_COLUMNS) if not self.board.column_full(i)]
 
 	def last_move(self):
 		return self.history[-1]
@@ -57,16 +61,16 @@ class Game(object):
 		return [group for group in self.all_possible_winning_groups() if group.count(element) > 0]
 
 	def all_possible_winning_groups(self):
-		V_HEADROOM = NUM_ROWS - GROUP_SIZE
-		H_HEADROOM = NUM_COLUMNS - GROUP_SIZE
+		V_HEADROOM = self.board.NUM_ROWS - GROUP_SIZE
+		H_HEADROOM = self.board.NUM_COLUMNS - GROUP_SIZE
 
 		base_vertical_group = [(0,i) for i in range(GROUP_SIZE)]
 		base_horizontal_group = [(i,0) for i in range(GROUP_SIZE)]
 		base_diagonal_group_ne = [(i,i) for i in range(GROUP_SIZE)]
 		base_diagonal_group_nw = [(i, (GROUP_SIZE-1) - i) for i in range(GROUP_SIZE)]
 
-		max_offsets_for_vertical_groups = (NUM_COLUMNS-1, V_HEADROOM)
-		max_offsets_for_horizontal_groups = (H_HEADROOM, NUM_ROWS-1)
+		max_offsets_for_vertical_groups = (self.board.NUM_COLUMNS-1, V_HEADROOM)
+		max_offsets_for_horizontal_groups = (H_HEADROOM, self.board.NUM_ROWS-1)
 		max_offsets_for_diagonal_groups = (H_HEADROOM, V_HEADROOM)
 
 		winning_group_definitions = [ 
