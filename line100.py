@@ -23,7 +23,6 @@ class ConsoleRunner(object):
 		while not game.is_over():
 			move = game.current_player().get_move(game)
 			game.record_move(move)
-			game.toggle_player()
 
 		self.show_results(game)
 	

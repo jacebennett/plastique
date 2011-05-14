@@ -21,6 +21,8 @@ class Game(object):
 		self.history.append(final_position)
 		if self.check_for_victory():
 			self.winner = self.current_player()
+		else:
+			self.toggle_player()
 
 	def undo(self):
 		if len(self.history) < 2:
