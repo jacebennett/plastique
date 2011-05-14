@@ -1,4 +1,4 @@
-MAX_COLUMN_SIZE=6
+NUM_ROWS=6
 NUM_COLUMNS=7
 
 PLAYER1 = 0
@@ -11,7 +11,7 @@ class GameBoard(object):
 			self.columns.append([])
 
 	def add_piece(self, pieceType, column_index):
-		if len(self.columns[column_index]) >= MAX_COLUMN_SIZE:
+		if len(self.columns[column_index]) >= NUM_ROWS:
 			"How should I throw?"
 		self.columns[column_index].append(pieceType)
 	
@@ -20,6 +20,14 @@ class GameBoard(object):
 			"How should I throw?"
 		self.columns[column_index].pop()
 	
+	def column_full(self, column_index):
+		return len(self.columns[column_index]) >= NUM_ROWS
+	
+	def get_piece_at(self, x, y):
+		if not len(self.columns[x]) > y:
+			return None
+		return self.columns[x][y]
+
 	def render(self):
 		for row in range(5, -1, -1):
 			row_strings = []
@@ -42,8 +50,10 @@ class Game(object):
 		while not self.is_over():
 			move = self.players[self.current_player].get_move(self)
 			self.record_move(move)
-			self.check_for_victory()
-			self.toggle_player()
+			if self.check_for_victory():
+				self.winner = self.current_player
+			else:
+				self.toggle_player()
 	
 	def record_move(self, move):
 		self.board.add_piece(self.current_player, move)
@@ -61,20 +71,21 @@ class Game(object):
 			self.toggle_player()
 
 	def check_for_victory(self):
-		"Not Implemented"
+		won = False
+		for group in self.possible_winning_groups_containing(self.last_move()):
+			won = won or [self.board.get_piece_at(x,y) for x,y in group].count(self.current_player) == len(group)
+		return won
 
 	def toggle_player(self):
 		self.current_player = PLAYER2 if self.current_player == PLAYER1 else PLAYER1
 
 	def get_legal_moves(self):
-		result = []
-		for i in range(len(self.board.columns)):
-			if len(self.board.columns[i]) < MAX_COLUMN_SIZE:
-				result.append(i)
-		return result
-	
+		return [i for i in range(len(self.board.columns)) if not self.board.column_full(i)]
+
 	def last_move(self):
-		return self.history[-1]
+		col = self.history[-1]
+		row = len(self.board.columns[col]) - 1
+		return (col,row)
 
 	def is_won(self):
 		return self.winner != None
@@ -84,6 +95,40 @@ class Game(object):
 
 	def is_over(self):
 		return self.is_won() or self.is_draw()
+
+	def possible_winning_groups_containing(self,element):
+		return [group for group in self.all_possible_winning_groups() if group.count(element) > 0]
+
+	def all_possible_winning_groups(self):
+		NUM_COLUMNS = 7
+		NUM_ROWS = 6
+		GROUP_SIZE = 4
+
+		V_HEADROOM = NUM_ROWS - GROUP_SIZE
+		H_HEADROOM = NUM_COLUMNS - GROUP_SIZE
+
+		base_vertical_group = [(0,i) for i in range(GROUP_SIZE)]
+		base_horizontal_group = [(i,0) for i in range(GROUP_SIZE)]
+		base_diagonal_group_ne = [(i,i) for i in range(GROUP_SIZE)]
+		base_diagonal_group_nw = [(i, (GROUP_SIZE-1) - i) for i in range(GROUP_SIZE)]
+
+		max_offsets_for_vertical_groups = (NUM_COLUMNS-1, V_HEADROOM)
+		max_offsets_for_horizontal_groups = (H_HEADROOM, NUM_ROWS-1)
+		max_offsets_for_diagonal_groups = (H_HEADROOM, V_HEADROOM)
+
+		winning_group_definitions = [ 
+			(base_vertical_group, max_offsets_for_vertical_groups),
+			(base_horizontal_group, max_offsets_for_horizontal_groups),
+			(base_diagonal_group_ne, max_offsets_for_diagonal_groups),
+			(base_diagonal_group_nw, max_offsets_for_diagonal_groups),
+			]
+
+		return [
+			[(x + dx, y + dy) for x,y in base_group]
+			for base_group, max_offset in winning_group_definitions
+			for dx in range(max_offset[0]+1)
+			for dy in range(max_offset[1]+1)
+			]
 
 from random import Random
 
@@ -98,7 +143,7 @@ class HumanPlayer(object):
 	def get_move(self, game):
 		if len(game.history) > 0:
 			print
-			print "Computer played in column " + str(game.last_move() + 1)
+			print "Computer played in column " + str(game.last_move()[0] + 1)
 			print
 		game.board.render()
 		print
@@ -134,6 +179,6 @@ if __name__ == "__main__":
 	if game.is_draw():
 		print " === DRAW === "
 	elif game.is_won():
-		print " === " + game.winner + " IS THE WINNER === "
+		print " === " + str(game.winner) + " IS THE WINNER === "
 	print
 
