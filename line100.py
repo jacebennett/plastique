@@ -3,6 +3,9 @@ from game import *
 from tty_player import *
 from computer_player import *
 
+PLAYER1_TOKEN = "0"
+PLAYER2_TOKEN = "1"
+
 class ConsoleBoardRenderer(object):
     def render_board(self, game):
         for row in range(game.board.NUM_ROWS - 1, -1, -1):
@@ -37,15 +40,15 @@ class ConsoleRunner(object):
         if mode == "easy":
             name = raw_input("What's your name? ")
             strategy = NegaMaxWithAlphaBetaPruningStrategy(3, NaiveHeuristic())
-            players = [ComputerPlayer(strategy, "0"), TtyPlayer(name, "1", self.renderer)]
+            players = [ComputerPlayer(strategy, PLAYER1_TOKEN), TtyPlayer(name, PLAYER2_TOKEN, self.renderer)]
         elif mode == "cagematch":
             player1strategy = NegaMaxWithAlphaBetaPruningStrategy(3, NaiveHeuristic())
             player2strategy = NegaScoutStrategy(6, NaiveHeuristic())
-            players = [ComputerPlayer(player1strategy, "0"), ComputerPlayer(player2strategy, "1")]
+            players = [ComputerPlayer(player1strategy, PLAYER1_TOKEN), ComputerPlayer(player2strategy, PLAYER2_TOKEN)]
         else:
             name = raw_input("What's your name? ")
             strategy = NegaScoutStrategy(6, NaiveHeuristic())
-            players = [ComputerPlayer(strategy, "0"), TtyPlayer(name, "1", self.renderer)]
+            players = [ComputerPlayer(strategy, PLAYER1_TOKEN), TtyPlayer(name, PLAYER2_TOKEN, self.renderer)]
 
         return Game(players)
 
@@ -56,7 +59,7 @@ class ConsoleRunner(object):
         if game.is_draw():
             print " === DRAW === "
         elif game.is_won():
-            print " === " + game.winner.name + " IS THE WINNER === "
+            print " === " + game.winner.token + " (" + game.winner.name + ") IS THE WINNER === "
         print
 
 if __name__ == "__main__":

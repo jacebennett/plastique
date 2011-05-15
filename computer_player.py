@@ -35,15 +35,14 @@ class TreeSearchStrategy(object):
         scores = []
         available_moves = game.get_legal_moves()
         for move in available_moves:
-            path = "%d:%d" % (game.current_player_index, move)
-            scores.append((self.get_score(game, move, path), move))
+            scores.append((self.get_score(game, move), move))
 
         end = datetime.now()
         elapsed = end - start
         print
-        print "After deliberating for " + str(elapsed) + ", Computer scores his moves as follows:"
+        print "After deliberating for " + str(elapsed) + ", " + self.name + " scores his moves as follows:"
         for score, move in scores:
-            print "\t" + str(move) + ": " + str(score)
+            print "  " + str(move) + ": " + str(score)
         print
 
         return self.choose_move(scores)
@@ -60,14 +59,14 @@ class TreeSearchStrategy(object):
 
         return self.rng.choice(best_moves)
 
-    def get_score(self, game, move, path):
+    def get_score(self, game, move):
         pass
 
 
 class NegaMaxStrategy(TreeSearchStrategy):
     name_format = "NegaMax(%d)"
 
-    def get_score(self, game, move, path):
+    def get_score(self, game, move):
         return -self.negamax(game, move, self.lookahead)
 
     def negamax(self, game, move, lookahead):
@@ -90,10 +89,10 @@ class NegaMaxStrategy(TreeSearchStrategy):
 class NegaMaxWithAlphaBetaPruningStrategy(TreeSearchStrategy):
     name_format = "NegaMaxAB(%d)"
 
-    def get_score(self, game, move, path):
-        return -self.negamax(game, move, path, self.lookahead, -INF, INF)
+    def get_score(self, game, move):
+        return -self.negamax(game, move, self.lookahead, -INF, INF)
 
-    def negamax(self, game, move, path, lookahead, alpha, beta):
+    def negamax(self, game, move, lookahead, alpha, beta):
         game.record_move(move)
 
         if game.is_over() or lookahead <= 0:
@@ -102,8 +101,7 @@ class NegaMaxWithAlphaBetaPruningStrategy(TreeSearchStrategy):
             return score
 
         for child_move in game.get_legal_moves():
-            child_path = path + ", %d:%d" % (game.current_player_index, child_move)
-            alpha = max(alpha, -self.negamax(game, child_move, child_path, lookahead - 1, -beta, -alpha))
+            alpha = max(alpha, -self.negamax(game, child_move, lookahead - 1, -beta, -alpha))
             if alpha >= beta:
                 break
 
@@ -113,7 +111,7 @@ class NegaMaxWithAlphaBetaPruningStrategy(TreeSearchStrategy):
 class NegaScoutStrategy(TreeSearchStrategy):
     name_format = "NegaScout(%d)"
 
-    def get_score(self, game, move, path):
+    def get_score(self, game, move):
         return -self.negascout(game, move, self.lookahead, -INF, INF)
 
     def negascout(self, game, move, lookahead, alpha, beta):
