@@ -12,7 +12,7 @@ class TtyPlayer(object):
 			print
 		self.renderer.render_board(game)
 		print
-		while(True):
+		while True:
 			command = raw_input("Which column (1-7, q=quit, u=undo)? ")
 			if command == "q":
 				exit()

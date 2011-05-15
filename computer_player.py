@@ -32,20 +32,24 @@ class TreeSearchStrategy(object):
 
     def get_move(self, game):
         start = datetime.now()
+
         scores = []
         available_moves = game.get_legal_moves()
         for move in available_moves:
             scores.append((self.get_score(game, move), move))
 
+        chosen_move = self.choose_move(scores)
+
         end = datetime.now()
         elapsed = end - start
+
         print
         print "After deliberating for " + str(elapsed) + ", " + self.name + " scores his moves as follows:"
-        for score, move in scores:
-            print "  " + str(move) + ": " + str(score)
+        print "  (" + ",".join([str(score) for score, move in scores]) + ")"
+        print "  And chooses: " + str(chosen_move)
         print
 
-        return self.choose_move(scores)
+        return chosen_move
 
     def choose_move(self, scores):
         best_score = -INF
