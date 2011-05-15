@@ -43,11 +43,11 @@ class ConsoleRunner(object):
             players = [ComputerPlayer(strategy, PLAYER1_TOKEN), TtyPlayer(name, PLAYER2_TOKEN, self.renderer)]
         elif mode == "cagematch":
             player1strategy = NegaMaxWithAlphaBetaPruningStrategy(3, NaiveHeuristic())
-            player2strategy = NegaScoutStrategy(6, NaiveHeuristic())
+            player2strategy = NegaScoutStrategy(8, NaiveHeuristic())
             players = [ComputerPlayer(player1strategy, PLAYER1_TOKEN), ComputerPlayer(player2strategy, PLAYER2_TOKEN)]
         else:
             name = raw_input("What's your name? ")
-            strategy = NegaScoutStrategy(6, NaiveHeuristic())
+            strategy = NegaScoutStrategy(7, NaiveHeuristic())
             players = [ComputerPlayer(strategy, PLAYER1_TOKEN), TtyPlayer(name, PLAYER2_TOKEN, self.renderer)]
 
         return Game(players)
