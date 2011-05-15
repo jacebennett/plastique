@@ -1,46 +1,65 @@
+import sys
 from game import *
 from tty_player import *
 from computer_player import *
 
 class ConsoleBoardRenderer(object):
-	def render_board(self, game):
-		for row in range(game.board.NUM_ROWS-1, -1, -1):
-			row_strings = []
-			for col in range(game.board.NUM_COLUMNS):
-				owner = game.board.get_piece_at(col,row)
-				if owner == None:
-					row_strings.append(".")
-				else:
-					row_strings.append(game.players[owner].token)
-			print "".join(row_strings)
+    def render_board(self, game):
+        for row in range(game.board.NUM_ROWS - 1, -1, -1):
+            row_strings = []
+            for col in range(game.board.NUM_COLUMNS):
+                owner = game.board.get_piece_at(col, row)
+                if owner is None:
+                    row_strings.append(".")
+                else:
+                    row_strings.append(game.players[owner].token)
+            print "".join(row_strings)
+
 
 class ConsoleRunner(object):
-	renderer = ConsoleBoardRenderer()
+    renderer = ConsoleBoardRenderer()
 
-	def run(self, args=None):
-		game = self.setup_game(args)
+    def run(self, args):
+        game = self.setup_game(args)
 
-		while not game.is_over():
-			move = game.current_player().get_move(game)
-			game.record_move(move)
+        while not game.is_over():
+            move = game.current_player().get_move(game)
+            game.record_move(move)
 
-		self.show_results(game)
-	
-	def setup_game(self, args):
-		strategy = MinimaxStrategy()
-		players = [ TtyPlayer("JACE", "X", self.renderer), ComputerPlayer(strategy, "O") ]
-		return Game(players)
+        self.show_results(game)
 
-	def show_results(self, game):
-		self.renderer.render_board(game)
-		print
-		if game.is_draw():
-			print " === DRAW === "
-		elif game.is_won():
-			print " === " + game.winner.name + " IS THE WINNER === "
-		print
+    def setup_game(self, args):
+        mode = ""
+
+        if len(args) > 1:
+            mode = args[1].lower()
+
+        if mode == "easy":
+            name = raw_input("What's your name? ")
+            strategy = NegaMaxWithAlphaBetaPruningStrategy(3, NaiveHeuristic())
+            players = [ComputerPlayer(strategy, "0"), TtyPlayer(name, "1", self.renderer)]
+        elif mode == "cagematch":
+            player1strategy = NegaMaxWithAlphaBetaPruningStrategy(3, NaiveHeuristic())
+            player2strategy = NegaScoutStrategy(6, NaiveHeuristic())
+            players = [ComputerPlayer(player1strategy, "0"), ComputerPlayer(player2strategy, "1")]
+        else:
+            name = raw_input("What's your name? ")
+            strategy = NegaScoutStrategy(6, NaiveHeuristic())
+            players = [ComputerPlayer(strategy, "0"), TtyPlayer(name, "1", self.renderer)]
+
+        return Game(players)
+
+
+    def show_results(self, game):
+        self.renderer.render_board(game)
+        print
+        if game.is_draw():
+            print " === DRAW === "
+        elif game.is_won():
+            print " === " + game.winner.name + " IS THE WINNER === "
+        print
 
 if __name__ == "__main__":
-	runner = ConsoleRunner()
-	runner.run()
+    runner = ConsoleRunner()
+    runner.run(sys.argv)
 
