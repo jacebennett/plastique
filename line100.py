@@ -27,7 +27,7 @@ class ConsoleRunner(object):
 		self.show_results(game)
 	
 	def setup_game(self, args):
-		strategy = RandomStrategy()
+		strategy = MinimaxStrategy()
 		players = [ TtyPlayer("JACE", "X", self.renderer), ComputerPlayer(strategy, "O") ]
 		return Game(players)
 

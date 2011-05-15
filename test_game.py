@@ -86,18 +86,33 @@ class GameTests(unittest.TestCase):
 		self.assertRaises(IndexError, lambda: self.game.undo())
 
 	def test_should_detect_victory(self):
-		self.game.record_move(3) #Player 1
-		self.game.record_move(6) #Player 2
-		self.game.record_move(2) #Player 1
-		self.game.record_move(6) #Player 2
 		self.game.record_move(1) #Player 1
-		self.game.record_move(6) #Player 2
+		self.game.record_move(2) #Player 2
+		self.game.record_move(1) #Player 1
+		self.game.record_move(2) #Player 2
+		self.game.record_move(1) #Player 1
+		self.game.record_move(2) #Player 2
 
 		self.assertFalse(self.game.is_won())
 
-		self.game.record_move(0) #Player 1
+		self.game.record_move(1) #Player 1
 
 		self.assertTrue(self.game.is_won())
 		self.assertEqual(self.game.winner, player1)
 
+	def test_rolling_back_a_winning_move_should_clear_the_winner(self):
+		self.game.record_move(1) #Player 1
+		self.game.record_move(2) #Player 2
+		self.game.record_move(1) #Player 1
+		self.game.record_move(2) #Player 2
+		self.game.record_move(1) #Player 1
+		self.game.record_move(2) #Player 2
+		self.game.record_move(1) #Player 1
+
+		self.assertTrue(self.game.is_won())
+
+		self.game.rollback(1)
+
+		self.assertFalse(self.game.is_won())
+		self.assertEqual(self.game.winner, None)
 

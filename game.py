@@ -31,9 +31,12 @@ class Game(object):
 
 	def rollback(self, count):
 		for i in range(count):
+			if self.is_won():
+				self.winner = None
+			else:
+				self.toggle_player()
 			col,row = self.history.pop()
 			self.board.remove_last_piece_in(col)
-			self.toggle_player()
 
 	def check_for_victory(self):
 		won = False
