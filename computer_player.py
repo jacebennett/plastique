@@ -77,7 +77,7 @@ class NegaMaxStrategy(TreeSearchStrategy):
         game.record_move(move)
 
         if game.is_over() or lookahead <= 0:
-            score = self.heuristic.score(game)
+            score = self.heuristic.score(game, lookahead)
             game.rollback(1)
             return score
 
