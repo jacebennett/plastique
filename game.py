@@ -5,44 +5,6 @@ GROUP_SIZE = 4
 PLAYER1 = 0
 PLAYER2 = 1
 
-V_HEADROOM = GameBoard.NUM_ROWS - GROUP_SIZE
-H_HEADROOM = GameBoard.NUM_COLUMNS - GROUP_SIZE
-
-def find_all_winning_groups():
-	base_vertical_group = [(0,i) for i in range(GROUP_SIZE)]
-	base_horizontal_group = [(i,0) for i in range(GROUP_SIZE)]
-	base_diagonal_group_ne = [(i,i) for i in range(GROUP_SIZE)]
-	base_diagonal_group_nw = [(i, (GROUP_SIZE-1) - i) for i in range(GROUP_SIZE)]
-
-	max_offsets_for_vertical_groups = (GameBoard.NUM_COLUMNS-1, V_HEADROOM)
-	max_offsets_for_horizontal_groups = (H_HEADROOM, GameBoard.NUM_ROWS-1)
-	max_offsets_for_diagonal_groups = (H_HEADROOM, V_HEADROOM)
-
-	winning_group_definitions = [ 
-		(base_vertical_group, max_offsets_for_vertical_groups),
-		(base_horizontal_group, max_offsets_for_horizontal_groups),
-		(base_diagonal_group_ne, max_offsets_for_diagonal_groups),
-		(base_diagonal_group_nw, max_offsets_for_diagonal_groups),
-		]
-
-	return [
-		[(x + dx, y + dy) for x,y in base_group]
-		for base_group, max_offset in winning_group_definitions
-		for dx in range(max_offset[0]+1)
-		for dy in range(max_offset[1]+1)
-		]
-
-def index_winning_groups():
-	result = {}
-	for group in find_all_winning_groups():
-		for element in group:
-			if not result.has_key(element):
-				result[element] = []
-			result[element].append(group)
-	return result
-
-
-IDX_WINNING_GROUPS_BY_LOCATION = index_winning_groups()
 
 class Game(object):
 	def __init__(self, players):
@@ -105,3 +67,44 @@ class Game(object):
 
 	def possible_winning_groups_containing(self,element):
 		return IDX_WINNING_GROUPS_BY_LOCATION[element]
+
+
+#Precompute some values that will be used a lot.
+
+V_HEADROOM = GameBoard.NUM_ROWS - GROUP_SIZE
+H_HEADROOM = GameBoard.NUM_COLUMNS - GROUP_SIZE
+
+def find_all_winning_groups():
+	base_vertical_group = [(0,i) for i in range(GROUP_SIZE)]
+	base_horizontal_group = [(i,0) for i in range(GROUP_SIZE)]
+	base_diagonal_group_ne = [(i,i) for i in range(GROUP_SIZE)]
+	base_diagonal_group_nw = [(i, (GROUP_SIZE-1) - i) for i in range(GROUP_SIZE)]
+
+	max_offsets_for_vertical_groups = (GameBoard.NUM_COLUMNS-1, V_HEADROOM)
+	max_offsets_for_horizontal_groups = (H_HEADROOM, GameBoard.NUM_ROWS-1)
+	max_offsets_for_diagonal_groups = (H_HEADROOM, V_HEADROOM)
+
+	winning_group_definitions = [ 
+		(base_vertical_group, max_offsets_for_vertical_groups),
+		(base_horizontal_group, max_offsets_for_horizontal_groups),
+		(base_diagonal_group_ne, max_offsets_for_diagonal_groups),
+		(base_diagonal_group_nw, max_offsets_for_diagonal_groups),
+		]
+
+	return [
+		[(x + dx, y + dy) for x,y in base_group]
+		for base_group, max_offset in winning_group_definitions
+		for dx in range(max_offset[0]+1)
+		for dy in range(max_offset[1]+1)
+		]
+
+def index_winning_groups():
+	result = {}
+	for group in find_all_winning_groups():
+		for element in group:
+			if not result.has_key(element):
+				result[element] = []
+			result[element].append(group)
+	return result
+
+IDX_WINNING_GROUPS_BY_LOCATION = index_winning_groups()
