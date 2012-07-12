@@ -39,9 +39,9 @@ class ConsoleRunner(object):
 
         if mode == "hard":
             name = raw_input("What's your name? ")
-            strategy = NegaScoutStrategy(8, NaiveHeuristic())
+            strategy = NegaScoutStrategy(9, NaiveHeuristic())
             players = [ TtyPlayer(name, PLAYER1_TOKEN, self.renderer), ComputerPlayer(strategy, PLAYER2_TOKEN) ]
-        if mode == "easy":
+        elif mode == "easy":
             name = raw_input("What's your name? ")
             strategy = NegaMaxStrategy(3, NaiveHeuristic())
             players = [ TtyPlayer(name, PLAYER1_TOKEN, self.renderer), ComputerPlayer(strategy, PLAYER2_TOKEN) ]

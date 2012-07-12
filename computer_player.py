@@ -138,7 +138,7 @@ class NegaScoutStrategy(TreeSearchStrategy):
             if alpha >= beta:
                 break
             b = alpha + 1
-        
+
         game.rollback(1)
         return alpha
 
